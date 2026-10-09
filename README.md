@@ -28,9 +28,11 @@ con el `sha256` de abajo.
 
 ## Estado versionado
 
-- `phantommeet/aquaponics-united.yaml` — versión `0.2.0`, 8874 bytes,
-  `sha256 dfde1fb7671a485a66fb524f771683d9b506af4d70c64afd775bd46a6fb7fe64`
-  (tal y como está en el VPS el 2026-10-09).
+- `phantommeet/aquaponics-united.yaml` — versión `0.2.0`, 9108 bytes,
+  `sha256 189882e215ca2d23f545ca1d210f675c8efe9a20948201bd24d03f9b1b4732e2`
+  (tal y como está en el VPS el 2026-10-09, tras el cambio de KB de ese día:
+  el acceso al material de reunión lo abre la invitación — ver
+  `docs/estructura-au/protocolo-acceso-material-reunion-2026-10-09.md`).
 
 ## Arreglo del arranque de jibri (incidente 2026-10-06, visto el 10-09)
 
