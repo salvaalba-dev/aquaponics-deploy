@@ -1,0 +1,12 @@
+# secretos y configuracion del host (nunca al repo)
+.env
+*.env
+config
+secrets*
+*.pem
+*.key
+# copias de seguridad a mano
+*.bak-*
+*.bak
+__pycache__/
+*.pyc

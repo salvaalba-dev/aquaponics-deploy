@@ -1,0 +1,241 @@
+org: aquaponics-united
+language: es
+version: 0.2.0
+bridge:
+  relay: ws://72.62.179.111:7777
+  npub: npub1z5zz0ul9rvhxgm6z4q20qcf427j9h73m9s2z6jctyvt35nhfyn3qtvt0jw
+rooms:
+  suffix: '@conference.meet.aquaponicsunited.com'
+  naming: '{YYYY-MM-DD}-{HH-MM}_{topic}'
+  active_room_required: true
+roles:
+  paco: responsible
+  pepa: responsible
+  roberto: responsible
+  alma: lead
+  elena: support
+  iris: support
+  carla: support
+  alicia: support
+permissions:
+  full:
+  - paco
+  - pepa
+  - roberto
+escalation:
+  alma: pepa
+  elena: pepa
+  iris: pepa
+  carla: pepa
+  alicia: pepa
+storage:
+  recordings_dir: /var/recordings
+  drive_folder: 01_REUNIONES_GO
+  custodian: pepa
+  meeting_folders:
+    alma: 01_REUNIONES_GO
+  decided_by: responsible
+  cleanup_after_confirm: true
+defaults:
+  title: reunion
+  time: '18:00'
+  duration_min: 60
+  recipients: []
+  sensitive: false
+legacy_kb_files:
+- kb/procedures/SalasJitsi.md
+kb_appendix:
+- '## Grabaciones — reglas
+
+
+  - **Avisar siempre** antes de grabar: "vamos a grabar la reunión" (transparencia/legal).
+
+  - Grabar por defecto en: asambleas, juntas directivas, comités con acuerdos.
+
+  - No grabar conversaciones informales salvo acuerdo explícito.
+
+  - Las grabaciones son propiedad de la organización; acceso restringido al equipo.'
+- '## Custodia (flujo post-reunión)
+
+
+  > **Decisión 24/08/2026 (Salvador):** la grabación + transcripción + resumen son
+
+  > **documentos** y entran al pipeline documental como cualquier otro: bandeja
+
+  > única → PhantomDocs (hash de integridad + categoría de sensibilidad) → destino.
+
+  > `01_REUNIONES_GO` es el **destino** del archivo procesado, no una copia de consulta.
+
+
+  1. El servidor genera el MP4 automáticamente.
+
+  2. El servidor transcribe el MP4 automáticamente con **Whisper local** (faster-whisper,
+  sin coste ni API).
+
+  3. El servidor genera el **resumen** automáticamente con **DeepSeek API** (modelo
+  de Paco, ~0,2 céntimos por reunión).
+
+  4. El MP4 + `.txt` + `.resumen.md` **entran al pipeline documental como cualquier
+  documento**: pasan por la **bandeja única** (ver [[Documents]]) y se procesan con
+  **PhantomDocs** — hash de integridad y categoría de sensibilidad. El archivo se
+  llama **igual que la sala** de la reunión + extensión (p. ej. `2026-08-10-18-06_asamblea_general.mp4`,
+  `.txt`, `.resumen.md`).
+
+  5. **Destino:** `01_REUNIONES_GO` — el DESTINO del archivo procesado, no una copia
+  de consulta (sustituye al antiguo default `0211_Grabaciones`).
+
+  6. Al terminar: **bandeja limpia** y **un único archivo en destino**.
+
+  7. Tras confirmarse el archivo en destino, el servidor **borra su copia** de `/var/recordings`.'
+- "## Rol logístico de la persona (agenda)\n\n- Las personas **responsables** agendan\
+  \ las reuniones online de toda la\n  organización con `meeting-invite.sh`.\n- Los\
+  \ **leads de proyecto** agendan las reuniones online **de su proyecto**\
+  \ con `meeting-invite.sh`. Si la solicitud\n  es de **fuera\
+  \ de su proyecto** (otro proyecto o reunión general de AU), la\n  **escalan a la persona\
+  \ responsable** con los parámetros exactos recibidos.\n- Las personas de **soporte**\
+  \ **no agendan** reuniones online: si reciben\n  una solicitud de reunión online,\
+  \ la **escalan a la persona responsable**\n  con los parámetros exactos recibidos.\n\
+  - El resto de la agenda (citas, calendario, recordatorios) lo gestiona cada\n  persona\
+  \ con normalidad.\n- La persona con calendario agenda la reunión, genera el enlace\
+  \ con la convención\n  (nombre de sala = nombre del archivo de grabación en Drive)\
+  \ y lo envía por\n  Telegram/email a los participantes.\n- **Nomenclatura de sala**\
+  \ (unificada con la del archivo en Drive):\n  `{YYYY-MM-DD}-{HH-MM}_{nombre}` (p.\
+  \ ej. `2026-08-10-18-06_asamblea_general`).\n  Guiones solo para la fecha/hora (los\
+  \ pone la máquina); el nombre lo pone el\n  usuario y sus espacios se convierten\
+  \ en `_` (minúsculas, sin acentos).\n- **Invitaciones a personas**: se envían por\
+  \ **Telegram** (grupo de coordinación o DM)\n  con la **ficha de comunicado** (formato\
+  \ configurable en el manifest,\n  `invite.card`; tokens `%TITLE%`/`%RECIPIENTS%`/`%DATETIME%`/`%LINK%`/\n\
+  \  `%ROOM%`/`%PASSWORD_LINE%`). El formato por defecto es:\n  ```\n  \U0001F4C5\
+  \ Reunión: <título>\n  \U0001F465 Destinatarios: @pepa, @paco\n  \U0001F550 <YYYY-MM-DDTHH:MM:SS>\n\
+  \  \U0001F517 https://meet.aquaponicsunited.com/<sala>\n  [\U0001F512 Contraseña:\
+  \ <clave>]   (solo si la sala está protegida)\n  ```\n  La línea **`Destinatarios`**\
+  \ va justo debajo del título y usa **menciones**\n  (`@…`); si la invitación se\
+  \ envía por DM individual, el destinatario es\n  implícito y puede omitirse la línea.\n\
+  - **Solo la persona destinataria** (su mención aparece en `Destinatarios`) se\n\
+  \  auto-programa y se une. Si el aviso no lleva tu mención, **no te unas ni\n  programes\
+  \ ningún task**: la invitación no es para ti.\n- La persona destinataria **programa\
+  \ un task** en phantombot para la hora de inicio\n  (ver «Unirse a reuniones» en\
+  \ Meetings.md) y se une sola al puente con\n  `join [<sala>] --nick <su-propio-nick>\
+  \ [--password <clave>]` — el nick es\n  **siempre la identidad de la persona que\
+  \ se une**, nunca la de otra.\n- Recordatorio: `meeting-invite.sh` agenda SOLO los\
+  \ avisos a -24h y -30min. Los humanos con email (definido en org.yaml → humans,\
+  \ compilado por phantomorg) reciben además la ficha por email: pasa `--email-to\
+  \ 'a@x,b@y'` al invocar el script.\n- Post-reunión: recibe el MP4, la transcripción\
+  \ (Whisper) y el resumen (DeepSeek), se distribuye el acta.\n- Cualquier persona\
+  \ puede consultar este protocolo y el estado de grabaciones con el comando `grabaciones`."
+- '## Seguridad
+
+
+  - Reuniones sensibles (personal, finanzas, datos privados): **contraseña siempre**
+  (candado en la UI).
+
+  - No compartir enlaces de salas sensibles fuera del equipo.
+
+  - Grabaciones: nunca públicas, solo Drive de la organización.'
+- '## Ejemplos de nombres de sala
+
+
+  `2026-08-10-18-06_asamblea_general`, `2026-08-14-10-00_junta_directiva`,
+
+  `2026-08-18-17-30_comite_aguas`, `2026-08-21-09-00_almaponia_revision`.
+
+  Enlace: `https://meet.aquaponicsunited.com/{nombre-sala}`.
+
+  La sala se crea sola al abrir el enlace — no hay que crear nada en el servidor.
+
+  La grabación se guarda en Drive con ese mismo nombre (+ extensión).'
+infra:
+  checks:
+  - name: python3
+    type: command
+    cmd: python3 --version
+  - name: bash
+    type: command
+    cmd: bash --version
+  - name: jitsi
+    type: http
+    url: https://meet.aquaponicsunited.com
+  - name: relay
+    type: ws
+    url: ws://72.62.179.111:7777
+  - name: bridge
+    type: http
+    url: http://127.0.0.1:8090/status
+    host: vps
+  - name: whisper-venv
+    type: file
+    path: /opt/whisper-transcribe/venv/bin/python
+    host: vps
+  - name: whisper-import
+    type: command
+    cmd: /opt/whisper-transcribe/venv/bin/python -c "import faster_whisper; print('faster-whisper',
+      faster_whisper.__version__)"
+    host: vps
+  - name: summary-env
+    type: env
+    path: /opt/whisper-transcribe/.env
+    key: DEEPSEEK_API_KEY
+    host: vps
+  - name: finalize-hook
+    type: command
+    cmd: grep -q "transcribe.py" /opt/jitsi/jibri/finalize.sh && echo "hook present"
+    host: vps
+  - name: jibri
+    type: command
+    cmd: systemctl is-active --quiet jibri jibri-xorg jibri-icewm pulseaudio-jibri || systemctl is-active jibri jibri-xorg jibri-icewm pulseaudio-jibri
+    host: vps
+  - name: phantombot
+    type: command
+    cmd: test -x "$HOME/.local/bin/phantombot" && "$HOME/.local/bin/phantombot" --version
+      || (command -v phantombot && phantombot --version)
+    host: macbook
+invite:
+  roles:
+  - paco
+  - pepa
+  - roberto
+  - alma
+  phantombot_bin: phantombot
+  coordinator_chat: '@coordinacion_aquaponics'
+  meet_base_url: https://meet.aquaponicsunited.com
+  send_via: phantombot-notify
+  telegram_bots:
+    paco: '@CEO_AU_bot'
+    pepa: '@PA_AU_bot'
+    roberto: '@CFO_AU_bot'
+    alma: '@Alma_AU_bot'
+    elena: '@Elena_AU_bot'
+  card: '🌊 AQUAPONICS UNITED 🌊
+
+    ━━━━━━━━━━━━━━━━━━━━━
+
+    📅 Reunión: %TITLE%
+
+    👥 Destinatarios: %RECIPIENTS%
+
+    🕐 %DATETIME%
+
+    🔗 %LINK%
+
+    %PASSWORD_LINE%
+
+    ━━━━━━━━━━━━━━━━━━━━━
+
+    "If you want to go fast, go alone.
+
+    If you want to go far, go together"
+
+    '
+  tool:
+    template: tools/meeting-invite.sh.j2
+    dest: tools/meeting-invite.sh
+    chmod: 0o755
+tools:
+  - name: meeting-join
+    template: tools/meeting-join.js.j2
+    dest: tools/meeting-join.js
+    chmod: 0o755
+  - name: sala-send
+    template: tools/sala-send.js.j2
+    dest: tools/sala-send.js
+    chmod: 0o755
