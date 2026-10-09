@@ -1,0 +1,20 @@
+[Unit]
+Description=Jibri Process
+Wants=jibri-icewm.service jibri-xorg.service
+After=network.target
+
+[Service]
+User=jibri
+Group=jibri
+Environment=XDG_RUNTIME_DIR=/run/user/995
+PermissionsStartOnly=true
+ExecStartPre=sudo -u jibri /usr/bin/google-chrome --timeout=1000 --headless about:blank
+ExecStart=/opt/jitsi/jibri/launch.sh
+ExecStop=/opt/jitsi/jibri/graceful_shutdown.sh
+ExecReload=/opt/jitsi/jibri/reload.sh
+Restart=always
+RestartPreventExitStatus=255
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

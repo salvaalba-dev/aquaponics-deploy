@@ -31,3 +31,33 @@ con el `sha256` de abajo.
 - `phantommeet/aquaponics-united.yaml` — versión `0.2.0`, 8874 bytes,
   `sha256 dfde1fb7671a485a66fb524f771683d9b506af4d70c64afd775bd46a6fb7fe64`
   (tal y como está en el VPS el 2026-10-09).
+
+## Arreglo del arranque de jibri (incidente 2026-10-06, visto el 10-09)
+
+En el arranque, `pulseaudio-jibri` falló (salida 1) y se recuperó sola 13 s después. Como
+`jibri.service` la exigía con `Requires=`, su arranque murió con «dependency failed» — y
+systemd **no reintenta** un trabajo que nunca llegó a arrancar. El grabador quedó caído
+2,5 días, en silencio.
+
+| Fichero | Qué cambia |
+| --- | --- |
+| `jibri.service` | `Requires=` → `Wants=` para X e icewm |
+| `jibri.service.d/pulseaudio.conf` | `Requires=` → `Wants=` para pulseaudio |
+| `jibri.service.d/zz-boot-order.conf` | Orden explícito + reintento cada 10 s sin límite |
+
+Aplicar en el VPS:
+
+```bash
+install -m 644 hosts/vps/systemd/jibri.service /etc/systemd/system/jibri.service
+install -m 644 hosts/vps/systemd/jibri.service.d/pulseaudio.conf /etc/systemd/system/jibri.service.d/pulseaudio.conf
+install -m 644 hosts/vps/systemd/jibri.service.d/zz-boot-order.conf /etc/systemd/system/jibri.service.d/zz-boot-order.conf
+systemctl daemon-reload
+```
+
+- `jibri.service` lo instala el paquete de Jitsi: si una actualización lo sobreescribe, hay
+  que volver a aplicar estas líneas.
+- Comprobado (systemd 255): un `Requires=` vacío en un drop-in **no** borra el del fichero
+  principal. Hay que cambiarlo en el fichero real.
+- Verificado simulando el fallo (dependencia enmascarada): el arranque de jibri da
+  `Result=success` en vez de `dependency`, y se recupera solo. Queda pendiente un reinicio
+  real como prueba definitiva.
