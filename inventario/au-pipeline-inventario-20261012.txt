@@ -1,0 +1,128 @@
+# Inventario instalado — pipeline de reuniones de AU (SOLO LECTURA)
+# Fecha: 2026-10-12 · Fuente: VPS root@72.62.179.111 (srv1684936.hstgr.cloud)
+# Método: find/sha256sum/ls/systemctl cat. NO se incluye el contenido (ni el hash) de
+# .env / .secret / google-service-account.json: solo se registra su PRESENCIA.
+
+# Inventario AU (pipeline de reuniones) — 2026-10-12T21:00:52Z — host srv1684936.hstgr.cloud
+
+## 0. Unidades y usuario
+# /etc/systemd/system/post-meeting.service
+ExecStart=/opt/post-meeting/post-meeting.sh
+post-meeting.timer:
+OnCalendar=Mon..Fri 09..19:00:00 Europe/Madrid
+Persistent=true
+
+## 1. Scripts vivos (excl. venv/__pycache__/*.bak*)
+ddd5ae7ecf55962f1041f9073d88a1724275232f0b7b75a4aa3952e0f8902568  /opt/post-meeting/acta.py
+ec4c8ecef8b65b98450cda3077512986c9694b5939a17341977c035eff766068  /opt/post-meeting/acta_a_pdf.py
+7c2de3344b5faa1696b19533d1c1d9895e2aa6906e037017bcc5140c69fdeb66  /opt/post-meeting/au-brand/html_to_pdf.js
+094c5654afbcebc8eea38f3e09aa4cf340d147d0cd05d0fac535be71d92e0c93  /opt/post-meeting/coherencia.py
+11f19bf8d3fad37c684036415d53099a0c043c207202940870749d84403e0e20  /opt/post-meeting/cotejo.py
+6a11db98777330b6e0dceddcaf88614d9da43c798d041ede6c40ba9d13cd67b2  /opt/post-meeting/diag.py
+b1d0efb24247dcd8dcdf8af4d25448834ed1a93f079c1c225232ebd720f989a0  /opt/post-meeting/drive-find.py
+37a4cee4994a112245c632a339e3fef5651507f866670de0a3bba110698ec681  /opt/post-meeting/drive-ls.py
+a14c5d921c6cff2aac800b6439dd3223040e34c2f36019cb7ecab899547e6766  /opt/post-meeting/fuentes.py
+1e8a8477ecaae50dd4914fb1b28189c586edc61a3724c7ed332e30a46f8c0aac  /opt/post-meeting/fusionar.py
+a61097e11e4f12c655cc5e20e61b938ed21f79888ea57201c2688fc7e5ce1237  /opt/post-meeting/get-dept-coord.py
+a61097e11e4f12c655cc5e20e61b938ed21f79888ea57201c2688fc7e5ce1237  /opt/post-meeting/get-dept.py
+830f23257b7816e622a4ef2bc791415aff67a962686cc68ce1d4f46f2b3d6646  /opt/post-meeting/get-dept2.py
+2b535c8d1789822acb92149812b24bc4570f7542d27ee905439bdfd1411eb186  /opt/post-meeting/patch-cotejo-borrar.py
+9a3b5d716dfc82bbeb6b55708065a2b915c5ae081e257adcdba0af2a745b8c4c  /opt/post-meeting/patch-pipeline.py
+6cb146c0cacdaa7f7ababa100199b0411f5c2dd91c1050cd5a3ab79ef580f518  /opt/post-meeting/patch-pipeline3.py
+a33d4f7e3b203e2f52e4e42f6fe3815f885ce8266c7b9126ad5365382a7cb867  /opt/post-meeting/patch-pipeline4.py
+9fc7dc829cfb95feebd401bc2d48c3189ba55804cc928789906f5e95d51c4f21  /opt/post-meeting/patch-pipeline5.py
+91cdffabc377b96859e8e2a1c612636e165b99a86ccc220ce8d2f3a11b85f5a4  /opt/post-meeting/patch-pipeline6.py
+c652b15905f51b5fd5dcaaf0d3f59ad0f5e0d9c8a4470bb90c161c64a862a336  /opt/post-meeting/patch-pipeline7.py
+0a6f77c63b42c5c15ad870b4c0f642444a7593950c73a8a0c1068b25ef438580  /opt/post-meeting/patch-upload.py
+03461bfa8db0307a0367171aa77353f5b671c3073b87d052a5944ee22e04499d  /opt/post-meeting/patch-upload2.py
+4fb31b72de59f474b980a309ea3173738de0053f5f3c4a6cc7e4f6ef3859c387  /opt/post-meeting/post-meeting.sh
+c7bba11631a5c8a63914cf1515dffff69ee1b8570786d4e89bfed1cd7743a5b0  /opt/post-meeting/probe403.py
+4c5f9eaf4a72566b7ed9d7b7609c9e16fe9e9d3f7deb52220314cca94087047f  /opt/post-meeting/referencia/verificar-drive.py
+f7aeae84be46568fd17619145f3958de6078f032e92f0312333e72d6cac94dd5  /opt/post-meeting/setup-ordenes.py
+90f84ca5875c40abd2f15cc744b5ebcf2a5d1625a4de047337eb05f99319605c  /opt/post-meeting/setup-ordenes2.py
+2af0ee2d605c03056a0ccab1850e9f5d7c8ed3fda1d94becd9df28fb537df177  /opt/whisper-transcribe/drive_upload.py
+f0c94a3c517df8a06f65d7a5e7db7b14c34af78d52daf515168a0c75cf23c3db  /opt/whisper-transcribe/process_recording.py
+c9b063784d0a0c1ef8fdfb4f7a54e71483feb97caadc950b778a837c78212773  /opt/whisper-transcribe/summarize.py
+487f674595357342ab66ba07ed3caae270abd0c07aee95e146ca23c4c0d76e1b  /opt/whisper-transcribe/transcribe.py
+836634aea2a8b07ad76eb0855ffdcdce47ddf8815c3d781f5bd80aa5abfad620  /opt/recordings-serve/mint-url.py
+0b1c1173dab985e7d51e720e1b98cac5a36ec4bdb6e2251eb12ca2aa18eb48c2  /opt/recordings-serve/serve.py
+134dbf73facaf56a3dea15350e60c17ea8f55975b8a16f8341ed2bad0bc0c247  /opt/diarize/diarize.py
+fccbcd14c4829e1cd3c897e8facaec73f5ee1399c9cf5351996865467f712f08  /opt/diarize/voces.py
+
+## 2. Intérprete
+lrwxrwxrwx 1 root root  7 Aug  7 19:27 /opt/whisper-transcribe/venv/bin/python -> python3
+lrwxrwxrwx 1 root root 16 Aug  7 19:27 /opt/whisper-transcribe/venv/bin/python3 -> /usr/bin/python3
+lrwxrwxrwx 1 root root  7 Aug  7 19:27 /opt/whisper-transcribe/venv/bin/python3.12 -> python3
+venv python: Python 3.12.3
+realpath: /usr/bin/python3.12
+e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f  /usr/bin/python3.12
+sistema: Python 3.12.3
+e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f  /usr/bin/python3.12
+
+## 3. ffmpeg / ffprobe
+/usr/bin/ffmpeg
+/usr/bin/ffprobe
+ed16af623947494a72e284b6eb8ff225f2da22b38b5d5069c2fd4b4ba3384e41  /usr/bin/ffmpeg
+272f6ebc634a63d9c8b4ca68e964119d980f25154e5aa2c35e5487da48e9a58f  /usr/bin/ffprobe
+ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+
+## 4. Modelos (>1 MB)
+ad4a1802485d8b34c722d2a9d04249662f2ece5d28a7a039063ca22f515a789e  /opt/diarize/models/emb.onnx
+d582f4b4c6b48205de7e0643c57df0df5615a3c176189be3fc461e9d18827b5d  /opt/diarize/models/sherpa-onnx-pyannote-segmentation-3-0/model.int8.onnx
+220ad67ca923bef2fa91f2390c786097bf305bceb5e261d4af67b38e938e1079  /opt/diarize/models/sherpa-onnx-pyannote-segmentation-3-0/model.onnx
+
+## 5. Prompts y plantillas
+-rw-r--r-- 1 root root  736 Sep 30 17:59 /opt/post-meeting/plantillas/AU_ActaReunion.md
+-rw-r--r-- 1 root root 1099 Oct 10 13:50 /opt/post-meeting/prompt-coherencia.txt
+-rw-r--r-- 1 root root  909 Oct 10 14:48 /opt/whisper-transcribe/prompt-resumen-v3.txt
+b79cb88390b93bf65dbef906bd83cd2088d630426d3513cb00fe18a905993d0f  /opt/whisper-transcribe/prompt-resumen-v3.txt
+60b6bb619c258483e5096f84e3d458258d406bdf15e9641d10ba8b8c52c1fa09  /opt/post-meeting/prompt-coherencia.txt
+54c017b52ef85bde25cbc23a5217c101678edc8f0f9bf39604f5288d0dba0d67  /opt/post-meeting/plantillas/AU_ActaReunion.md
+
+## 6. Branding (au-brand)
+total 280
+-rw-r--r-- 1 root root  27774 Sep 30 18:08 Anagrama_AU.png
+-rw-r--r-- 1 root root 220296 Sep 30 18:08 Logo_AU_horizontal.png
+-rw-r--r-- 1 root root  30675 Sep 30 18:08 Marca_agua_AU.png
+-rw-r--r-- 1 root root   3398 Sep 30 18:09 html_to_pdf.js
+e3b83e83a504fd5d76b5192e8d53c993d1e762144cc39a3fa9e2dd6ba734cffc  /opt/post-meeting/au-brand/Anagrama_AU.png
+548af9ee88ed66f64a71033e23161261d64c9a5f786eb4f1cab564facaf97590  /opt/post-meeting/au-brand/Logo_AU_horizontal.png
+1221071727a03836098c1fbfaae0cb0f9ac15f1b20a30e303cd489f013bdfbc6  /opt/post-meeting/au-brand/Marca_agua_AU.png
+7c2de3344b5faa1696b19533d1c1d9895e2aa6906e037017bcc5140c69fdeb66  /opt/post-meeting/au-brand/html_to_pdf.js
+
+## 7. Ficheros de credenciales (solo presencia, sin contenido)
+/opt/whisper-transcribe/.env: presente
+/opt/whisper-transcribe/google-service-account.json: presente
+/opt/recordings-serve/.secret: presente
+
+## 8. Versiones de librerías clave
+ctranslate2        4.8.1
+faster-whisper     1.2.1
+google-auth        2.56.3
+numpy              2.5.1
+
+## 4b. Modelo Whisper (faster-whisper large-v3-turbo)
+ruta: /root/.cache/huggingface/hub/models--mobiuslabsgmbh--faster-whisper-large-v3-turbo  (1,6 GB)
+refs/main: 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf
+sha256 (blobs >1 MB):
+c69260f2ab26d659b7c398f9a2b2b48ed0df16c3b47d7326782fd9cba71690c1  blobs/0adcd01e7c237205d593b707e66dd5d7bc785d2d
+e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da  blobs/e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da
+297b13372ac43916285644fb9687add3cc62ee2a1adb60da3dc25cc94c1871fd  blobs/17456db595adc78a973f97d69d8cb50bc87c0b1c
+
+## 9. Notas técnicas
+- Intérprete: venv/bin/python -> /usr/bin/python3.12 (Python 3.12.3).
+- ffmpeg/ffprobe 6.1.1-3ubuntu5 (/usr/bin).
+- Transcripción: faster-whisper 1.2.1 + CTranslate2 4.8.1; modelo large-v3-turbo (mobiuslabsgmbh), caché HF de root.
+- Diarización: sherpa-onnx (pyannote segmentation-3-0) + emb.onnx en /opt/diarize/models.
+- Los 'patch-*.py' son parches de un solo uso ya aplicados; se listan por completitud.
+
+## 10. PhantomView — dónde está (NO está en phantomyard-tools)
+- Código: repo PRIVADO salvaalba-dev/phantomyard-tools-private (rama main), carpeta phantomview/ (+ README.md raíz).
+  Descripción del repo: 'Private PhantomView development: a read-only visual observatory for Phantomyard
+  organizations, personas, tools, knowledge, documents and installation dependencies.'
+- Desplegado en el VPS: /opt/phantomview-au/ (copia de trabajo, SIN .git).
+- Unidades: phantomview-au.service, phantomview-au-assistant.service, phantomview-au-assistant-bridge.service,
+  phantomview-au-collect.timer (enabled); builds transitorios phantomview-au-build/-security-build.
+- Paquete piloto: /tmp/phantomview-au-pilot-20261011/phantomview-0.1.0.zip
+- El repo PÚBLICO phantomyard-tools (fork) NO lo trae (0 coincidencias); allí sí están phantomorg, phantomdocs,
+  phantommeet, phantomblog, phantombridge, bot-inbox, email-triage, github-app-auth, facebook-connector, twilio-voice-agent.
