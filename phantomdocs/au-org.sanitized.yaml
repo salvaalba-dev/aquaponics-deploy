@@ -1,0 +1,516 @@
+version: 1
+organization:
+  id: aquaponics-united
+  name: Aquaponics United
+  sector: ngo
+  languages:
+  - es
+  - en
+  default_language: es
+departments:
+- id: direccion
+  name: Dirección
+  parent: null
+  access_policy: level-3
+- id: operaciones
+  name: Operaciones
+  parent: direccion
+  access_policy: level-2
+- id: formacion
+  name: Formación
+  parent: direccion
+  access_policy: level-2
+- id: finanzas
+  name: Finanzas
+  parent: direccion
+  access_policy: level-2
+- id: alianzas
+  name: Alianzas
+  parent: direccion
+  access_policy: level-2
+- id: marketing
+  name: Marketing y Comunicación
+  parent: direccion
+  access_policy: level-2
+- id: voluntariado
+  name: Voluntariado
+  parent: direccion
+  access_policy: level-2
+
+roles:
+- id: ceo
+  name: CEO
+  department: direccion
+  reports_to: null
+  reports_to_human: Salvador
+  functions:
+  - vision
+  - liderazgo
+  - wikipedia_au
+  - tools
+  access_level: level-3
+  security_exceptions:
+  - category-4
+  description: Dirección general, estrategia, decisiones que afectan a toda la organización,
+    relaciones con la presidencia (Salvador). Contactar ante dudas sobre prioridades,
+    conflictos entre departamentos, autorización de nuevas líneas de trabajo o cualquier
+    cosa que nadie más pueda decidir.
+- id: chief_of_staff
+  name: Chief of Staff
+  department: direccion
+  reports_to: ceo
+  functions:
+  - coordinacion
+  - escalado
+  - seguimiento
+  access_level: level-2
+  security_exceptions:
+  - category-3
+  - category-4
+  description: Coordinación de proyectos, comunicación, educación, alianzas, voluntariado.
+    Supervisa a Elena y Alicia (Voluntariado). Contactar ante problemas
+    operativos en un departamento gestionado, necesidad de coordinación entre equipos
+    o escalado de un issue.
+- id: cfo
+  name: CFO
+  department: finanzas
+  reports_to: ceo
+  functions:
+  - finanzas
+  - reporting
+  access_level: level-2
+  security_exceptions:
+  - category-3
+  - category-4
+  description: Presupuestos, facturación, tesorería, cash flow, informes financieros,
+    viabilidad económica. Contactar para saber si hay presupuesto, aprobar un gasto,
+    revisar liquidez o preparar un informe financiero.
+- id: project_lead
+  name: Project Lead
+  department: operaciones
+  reports_to: chief_of_staff
+  functions:
+  - proyectos
+  - seguimiento_campo
+  access_level: level-2
+  security_exceptions: []
+  description: Proyecto ALMAPONIA (GO Project). Coordinación del piloto, documentación,
+    ejecución. Contactar para cualquier cosa relacionada con ALMAPONIA.
+- id: training_lead
+  name: Training Lead
+  department: formacion
+  reports_to: chief_of_staff
+  functions:
+  - formacion
+  - documentacion
+  access_level: level-2
+  security_exceptions: []
+  description: Talleres, cursos, material formativo, educación en acuaponía. Contactar
+    para contenido formativo, organizar un taller o revisar material didáctico.
+- id: partnerships
+  name: Head of Alliances & Fundraising
+  department: alianzas
+  reports_to: ceo
+  functions:
+  - alianzas
+  - fundraising
+  - subvenciones
+  access_level: level-2
+  security_exceptions: []
+  description: Alianzas estratégicas y captación de fondos (convocatorias, propuestas
+    y justificaciones). Pipeline de grants, relación con financiadores (Unión Europea,
+    fundaciones, empresa) y cumplimiento post-award. Reporta a Dirección (CEO).
+    Contactar para propuestas, plazos de convocatoria, justificación de ayudas o
+    cualquier acuerdo con un financiador.
+
+- id: marketing
+  name: Head of Marketing & Communication
+  department: marketing
+  reports_to: ceo
+  functions:
+  - marketing
+  - comunicacion
+  access_level: level-2
+  security_exceptions: []
+  description: Marketing y comunicación (redes sociales, web, prensa, newsletter
+    y estrategia de marca). Reporta a Dirección (CEO). Contactar para contenido
+    público, campañas, difusión de logros o material de marca.
+- id: volunteer_lead
+  name: Responsable de Voluntariado
+  department: voluntariado
+  reports_to: chief_of_staff
+  functions:
+  - voluntariado
+  - coordinacion_voluntarios
+  access_level: level-2
+  security_exceptions: []
+  description: Responsable del voluntariado (reclutamiento, coordinación y cuidado del equipo). Reporta a Jefatura de Gabinete (Chief of Staff). Contactar para altas, tareas y dudas del voluntariado.
+
+actors:
+- id: paco
+  role: ceo
+  npub: npub1mrge4p2rxr20lw7thdu6d07qv8jf8qlzy0fnaqh9cpjfacs29wesvedzxg
+  telegram_bot: '@CEO_AU_bot'
+  tools:
+  - email
+  - drive
+  - calendar
+  - notebooklm
+  - printing
+  - documents
+  tools_excluded: []
+  actor_exceptions:
+  - category-0
+  tone: formal-cercano
+  email: direccion@aquaponicsunited.com
+- id: pepa
+  role: chief_of_staff
+  npub: npub1q737jpsvel9xhmpe88fs4gwgm2y7l4495nzzqqf2h4gjwzxtt9ys4z8wch
+  telegram_bot: '@PA_AU_bot'
+  tools:
+  - email
+  - drive
+  - calendar
+  - documents
+  tools_excluded:
+  - send
+  actor_exceptions: []
+  email: secretaria@aquaponicsunited.com
+- id: roberto
+  role: cfo
+  npub: npub1dqxhh6yfp6enqz3t7z2xf5e2zrt9jcvc4fzeexey9ecqyctcfslqnd7nv4
+  telegram_bot: '@CFO_AU_bot'
+  tools:
+  - email
+  - drive
+  - calendar
+  - sheets
+  - documents
+  tools_excluded: []
+  actor_exceptions: []
+  email: cfo@aquaponicsunited.com
+- id: alma
+  role: project_lead
+  npub: npub1rdwu3q9rcstqufaaanr5tasyxfyzfu5u8d83pkz98zsmskd3epmqy0uye8
+  telegram_bot: '@Alma_AU_bot'
+  tools:
+  - email
+  - drive
+  - calendar
+  - notebooklm
+  - documents
+  tools_excluded: []
+  actor_exceptions:
+  - category-4-almaponia
+  email: almaponia@aquaponicsunited.com
+- id: elena
+  role: training_lead
+  npub: npub19eada04ceks6pmcvgpy8ypycndx9w3g8l9w27uhzy3dsalhjf0cqrkunu6
+  telegram_bot: '@Elena_AU_bot'
+  tools:
+  - email
+  - drive
+  - notebooklm
+  - documents
+  tools_excluded: []
+  actor_exceptions: []
+  email: formacion@aquaponicsunited.com
+- id: iris
+  role: partnerships
+  npub: npub1gwpczlhaet5k59pzgauvaqxt64j0hmyds0e50z0289v8n3ymmr4sjsch8g
+  telegram_bot: '@Iris_AU_bot'
+  tools:
+  - email
+  - drive
+  - notebooklm
+  - documents
+  tools_excluded: []
+  actor_exceptions: []
+  email: alianzas@aquaponicsunited.com
+
+- id: carla
+  role: marketing
+  npub: npub1xhaytlyjnv0q5hfxtv5lpf8x7pym7n3fjjhdnfsqvc9l3a0n8zwsvmd0m8
+  telegram_bot: '@Carla_AU_bot'
+  tools:
+  - email
+  - drive
+  - notebooklm
+  - documents
+  tools_excluded: []
+  actor_exceptions: []
+  email: marketing@aquaponicsunited.com
+- id: alicia
+  role: volunteer_lead
+  npub: npub1uzzegrrqseh8nk8ywyxjemyhtgxuaam5jysf2uc8qt7m7cp3npsqwxdhj7
+  telegram_bot: null
+  tools:
+  - drive
+  - documents
+  tools_excluded: []
+  actor_exceptions: []
+  email: null
+humans:
+- id: salvador
+  name: Salvador Alba Sánchez
+  role: Presidente de AU (Board President)
+  telegram_user_id: null
+  npub: null
+  email: <redacted>
+- id: brigitte
+  name: Brigitte Reters
+  role: Secretaria de AU
+  telegram_user_id: null
+  npub: null
+  email: <redacted>
+- id: fran
+  name: Fran Villada
+  role: Tesorero de AU
+  telegram_user_id: null
+  npub: null
+  email: <redacted>
+- id: beatriz
+  name: Beatriz de la Parra
+  role: ALMAPONIA Coordinator member
+  telegram_user_id: null
+  npub: null
+  email: <redacted>
+policies:
+  access_levels:
+    level-3:
+      label: Ejecutivo
+      categories:
+      - 1
+      - 2
+      - 3
+    level-2:
+      label: Operativo
+      categories:
+      - 1
+      - 2
+    level-1:
+      label: Restringido
+      categories:
+      - 1
+  security_categories:
+    category-0:
+      label: Excepción absoluta
+      scope: actor
+      owner: Salvador
+    category-1:
+      label: Público / interno bajo
+    category-2:
+      label: Confidencial
+    category-3:
+      label: Credenciales / financiero sensible
+    category-4:
+      label: Sensible de proyecto (paraguas)
+      scope: project
+    category-4-almaponia:
+      label: Sensible — Proyecto ALMAPONIA
+      scope: project
+      owner: project_lead
+escalation_matrix:
+- from: project_lead
+  to: chief_of_staff
+  condition: bloqueo operativo o desacuerdo de campo
+  cross_department: false
+- from: training_lead
+  to: chief_of_staff
+  condition: contenido fuera de alcance de formación
+- from: volunteer_lead
+  to: chief_of_staff
+  condition: dudas o bloqueo del voluntariado
+  cross_department: false
+- from: marketing
+  to: ceo
+  condition: dudas o bloqueo de marketing
+  cross_department: false
+- from: cfo
+  to: ceo
+  condition: gasto por encima del umbral de política financiera
+  cross_department: false
+- from: chief_of_staff
+  to: ceo
+  condition: bloqueo no resuelto en su nivel
+  cross_department: false
+- from: '*'
+  to: ceo
+  condition: excepción Category 0 solicitada
+  cross_department: true
+- from: ceo
+  to: project_lead
+  condition: respuesta del CEO a escalada de proyecto (cierre de bucle)
+  cross_department: false
+  kind: response
+- from: cfo
+  to: chief_of_staff
+  condition: coordinación financiera con jefatura de gabinete
+  cross_department: true
+  kind: coordination
+- from: chief_of_staff
+  to: cfo
+  condition: coordinación financiera con el CFO
+  cross_department: true
+  kind: coordination
+- from: chief_of_staff
+  to: partnerships
+  condition: coordinación de alianzas (jefatura de gabinete)
+  cross_department: true
+  kind: coordination
+- from: partnerships
+  to: chief_of_staff
+  condition: coordinación de alianzas (jefatura de gabinete)
+  cross_department: true
+  kind: coordination
+communication:
+  request_id_format: '{org_id}-{yyyymmdd}-{seq4}'
+  message_types:
+  - REQUEST
+  - INFORM
+  - ESCALATE
+  - CONFIRM
+  - REJECT
+  max_hops: 3
+  norm_version: '1.5'
+  envelope:
+    marker: '[env]'
+    ttl_hours: 6
+  channels:
+    human:
+      platform: telegram
+      group: AU Coordinación
+      chat_id: "<redacted>"
+    agent:
+      platform: phantomchat
+      relay: <redacted>
+      bridge_npub: <redacted>
+      human_npubs:
+      - npub139ndduz3dhnnl6868gmzgutv7kepqt2tg9fj0890ar6d9avwwhcqrmlecu
+      public_relays:
+      - wss://relay.damus.io
+      - wss://nos.lol
+      - wss://relay.primal.net
+      - wss://nostr.mom
+      - wss://nostr.data.haus
+documents:
+  namespace: au
+  org_pubkey: npub1ttkrrfadcrqps2vs6lmrq8rlr3dp6km378z4xklmz3jt82s2jytqzfw5mu
+  inboxes:
+    paco:
+      name: AU Inbox/01_Direccion/inbox
+      id: 16NpHdnETcn0LagLjxWP0x8Lo6AO4MBtG
+    pepa:
+      name: AU Inbox/02_Secretaria/inbox
+      id: 1aaOqIdZeLCNbRmz2P9sAS1k3Oy3QfGp-
+    roberto:
+      name: AU Inbox/03_CFO/inbox
+      id: 1LU_zDsf26Y7h_gkFy5UCbFrO26euXFcC
+    alma:
+      name: 00_INBOX
+      id: 17Owx101Wcqvi_yvKMHKP7jgg3bflrbrt
+    elena:
+      name: AU Inbox/07_Formacion/inbox
+      id: 1HAbm6H68j4aa2lUJusBXSss45D1TJx8E
+    carla:
+      name: AU Inbox/06_Marketing/inbox
+      id: 1mIPDvOsHi_B_DLI87tFcemSvRfSGzQtF
+    voluntariado:
+      name: AU Inbox/04_Voluntariado/inbox
+      id: 1MIPoaQI8DX9A0hvOIq3h98v0L2Qt46Gr
+    iris:
+      name: AU Inbox/08_Alianzas/inbox
+      id: 1kH4LYfyhC9KjxwSrXWPRQ81i4ND_zR5M
+
+  naming:
+    domains:
+    - id: direction
+      category: 2
+      owners:
+      - ceo
+      types:
+      - id: action-plans
+      - id: strategy
+      - id: reports
+    - id: secretariat
+      category: 2
+      owners:
+      - chief_of_staff
+      types:
+      - id: minutes
+      - id: authorizations
+      - id: certifications
+      - id: contracts
+      - id: diplomas
+      - id: official-docs
+      - id: philosophy
+      - id: identifications
+        category: 3
+      - id: insurance
+      - id: templates
+    - id: finance
+      category: 3
+      owners:
+      - cfo
+      types:
+      - id: vat
+      - id: certificates
+      - id: legislation
+      - id: cash-flow
+      - id: bank
+      - id: guides
+      - id: identifications
+    - id: projects
+      category: 2
+      owners:
+      - project_lead
+      - chief_of_staff
+      - cfo
+      types:
+      - id: almaponia
+      - id: almaponia-budget
+        category: category-4-almaponia
+      - id: almaponia-contracts
+        category: category-4-almaponia
+      - id: almaponia-partners
+        category: category-4-almaponia
+      - id: almaponia-identifications
+        category: category-4-almaponia
+    - id: training
+      category: 1
+      owners:
+      - training_lead
+      types:
+      - id: manuals
+      - id: fish
+      - id: biofloc
+      - id: references
+      - id: theses
+      - id: gardening
+    - id: branding
+      category: 1
+      owners:
+      - ceo
+      types:
+      - id: logos
+      - id: fonts
+      - id: editable
+      - id: templates
+      - id: merch
+      - id: collaborators
+      - id: originals
+    - id: alliances
+      category: 2
+      owners:
+      - partnerships
+      types: []
+    - id: marketing
+      category: 1
+      owners:
+      - marketing
+      types: []
+    - id: volunteering
+      category: 1
+      owners:
+      - volunteer_lead
+      types: []
