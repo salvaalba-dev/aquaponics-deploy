@@ -1,0 +1,37 @@
+# Muestra SANEADA (2026-10-12) de /home/pb-pepa/.config/phantombot/config.toml (VPS).
+# token y api_key van como <redacted>; los ids de Telegram, como <redacted-telegram-id>.
+# El fichero vivo es 0600 y solo lleva el token de ESA persona.
+# La persona por defecto NO se elige aquí: la elige state.json -> default_persona
+# (ver ../phantombot-persona-por-defecto.md).
+
+[channels.telegram]
+token = "<redacted>"
+allowed_user_ids = [ <redacted-telegram-id>, <redacted-telegram-id> ]
+poll_timeout_s = 30
+
+[harnesses]
+chain = [ "native" ]
+
+[harnesses.pi.routing]
+primary_model = "deepseek-flash"
+provider = "deepseek"
+
+[embeddings]
+provider = "gemini"
+
+[embeddings.gemini]
+api_key = "<redacted>"
+model = "gemini-embedding-001"
+dims = 1536
+
+[jev]
+provider = "openrouter"
+model = "typesafe/jev-1.13"
+base_url = "https://openrouter.ai/api/v1"
+key_env = "PHANTOMBOT_JEV_API_KEY"
+
+[autostart_modes]
+pepa = "login"
+
+[jev.judge]
+enabled = true
