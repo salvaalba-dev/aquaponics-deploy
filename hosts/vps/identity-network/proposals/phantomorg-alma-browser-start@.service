@@ -1,0 +1,29 @@
+[Unit]
+Description=Fixed Alma browser-start request handler (proposal)
+CollectMode=inactive-or-failed
+
+[Service]
+Type=exec
+User=root
+Group=root
+ExecStart=/usr/bin/python3 -I /usr/local/libexec/alma_browser_start_broker.py
+StandardInput=socket
+StandardOutput=null
+StandardError=journal
+RuntimeMaxSec=35
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+LockPersonality=yes
+UMask=0077

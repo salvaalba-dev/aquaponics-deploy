@@ -77,6 +77,12 @@ The helper's health result is neither Google-login validation nor an approval gr
 
 ## Required next design
 
+The fixed-operation controller is now a review component under
+proposals/BROWSER-START-CONTROLLER.md, with proposed socket/service units and
+Linux socket tests. It is not deployed. It supersedes the limited sudo helper as
+the intended on-demand design, but requires the client, observer and namespace
+integration below before it can become an installable pilot.
+
 1. Preserve NoNewPrivileges. Use a narrowly scoped external control service,
    reachable through an AF_UNIX socket with filesystem permissions and peer-UID
    checks, for the fixed browser-start operation. Do not grant an arbitrary
