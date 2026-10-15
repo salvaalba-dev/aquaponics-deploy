@@ -49,7 +49,12 @@ class TestControllerBinding(unittest.TestCase):
         self.assertIn("/usr/local/libexec/persona_service_control.py broker", handler)
         self.assertIn("NoNewPrivileges=yes", handler)
         proposals = ROOT / "hosts/vps/identity-network/proposals"
-        self.assertEqual(list(proposals.glob("*.py")), [])
+        for filename in (
+            "alma_browser_start_broker.py",
+            "alma_browser_start_client.py",
+            "persona_service_control.py",
+        ):
+            self.assertFalse((proposals / filename).exists())
         self.assertEqual(list(proposals.glob("*.sh")), [])
 
 

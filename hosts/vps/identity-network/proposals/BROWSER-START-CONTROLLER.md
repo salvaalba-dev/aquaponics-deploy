@@ -42,7 +42,8 @@ implemented; this binding is not evidence of such validation or query approval.
 The nonsecret binding should be root-owned 0644 with root-owned, nonwritable
 parents so the contained client can read it. The product rejects symlinks,
 untrusted ownership, writable parents and UID drift. Root owns code and units.
-The account's actual primary GID must be resolved on the approved target; the
+Read-only inventory confirms primary GID 1059, which must be rechecked before
+application. The account's actual primary GID is resolved on the target; the
 renderer uses that numeric GID, without assuming that group and account names or
 UID and GID match. AU CI uses a synthetic GID and is not host attestation.
 
@@ -61,7 +62,8 @@ with this fixed argv, retaining its own post-start browser check:
 /usr/bin/python3 -I /usr/local/libexec/persona_service_control.py client --config /etc/persona-service-control/alma-browser.json
 ```
 
-This is an interface specification, not an applied or complete client patch.
+CLIENT-INTEGRATION.md now supplies the exact wake-function patch and source
+preflight. That patch is tested but unapplied, and is not a complete pilot.
 Require the existing mapping to be exactly chrome-alma and CDP 18802 before
 selecting this AU binding. Do not redirect another persona to Alma. Keep real
 clients and Chrome together in Alma's eventual network namespace. The old direct

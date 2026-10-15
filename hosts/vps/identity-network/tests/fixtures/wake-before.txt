@@ -1,0 +1,14 @@
+async function wakeAndCheck(cfg) {
+  var ch = await checkChrome(cfg.cdp_port);
+  if (ch.ok) return ch;
+  if (cfg.chrome_service) {
+    try {
+      require("node:child_process").execFileSync(
+        "/usr/bin/sudo",
+        ["-n", "/usr/local/bin/chrome-alma-ensure", cfg.chrome_service],
+        { timeout: 45000, stdio: "ignore" });
+    } catch (e) { /* sin permiso o fallo: seguimos y reportamos CHROME_DOWN */ }
+    ch = await checkChrome(cfg.cdp_port);
+  }
+  return ch;
+}

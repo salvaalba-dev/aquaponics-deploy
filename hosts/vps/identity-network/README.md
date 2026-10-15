@@ -77,6 +77,13 @@ chrome-alma.service start operation. The product derives the control socket from
 the binding ID. It contains no browser profile path, credential or port.
 proposals/BROWSER-START-CONTROLLER.md explains the boundary and remaining work.
 
+proposals/CLIENT-INTEGRATION.md now records the exact store-level browser backend,
+an AU-only wake-function patch, read-only source preflight and fake-backend tests.
+The captured original function matches the live read-only SHA-256 fingerprint.
+It also records the idle observer's error handling and lifecycle-race blockers;
+no idle-stop or namespace deployment is included. Do not install the client patch
+independently of that complete transition.
+
 ## Required next design
 
 The generic controller is a review component, not deployed. Its renderer produces
