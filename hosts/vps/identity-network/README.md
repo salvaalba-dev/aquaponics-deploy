@@ -49,9 +49,18 @@ This agrees with Alma's existing kb/procedures/pipeline-conocimiento.md and
 kb/procedures/tools-alma.md. It does not grant either approver browser-session
 access. Service start permission is not permission to query NotebookLM.
 
-The first portable service policy format supports actor approvers only. Do not
-misrepresent Salvador as an actor or silently omit him. The product contract
-needs explicit human-approver support before an AU policy can represent this rule.
+Portable service policy format 1 supports actor approvers only. Format 2 on the
+product's feat/service-isolation-policy branch adds explicit actor/human tags.
+Do not misrepresent Salvador as an actor or silently omit him. The accompanying
+fragment uses Paco's actor ID and Salvador's human ID verified in the live model.
+It is not a complete deployment policy and has not been merged into live org.yaml.
+The runtime must still implement the confirmed per-query, either-approver rule.
+
+The authority test checks only the fragment and the actor/human ID registries in
+the sanitized snapshot. That snapshot contains literal redaction placeholders
+which fail full PhantomOrg shape validation; this check is not a claim that the
+entire sanitized org can be built or that a live query has been authorized.
+Production validation is not weakened to accept those placeholders.
 
 ## Limited helper proposal
 

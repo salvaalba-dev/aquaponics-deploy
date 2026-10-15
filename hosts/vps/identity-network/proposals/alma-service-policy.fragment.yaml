@@ -1,0 +1,16 @@
+# Review fragment only. Do not replace org.yaml or other services with this file.
+# Per query: Paco OR Salvador, through AU Coordination (confirmed 2026-10-15).
+# This declares authority; it is not an approval receipt or runtime enforcement.
+service_policy:
+  version: 2
+  default_access: deny
+  services:
+    - id: notebooklm
+      kind: private
+      owner_actor: alma
+      consumers:
+        - {kind: actor, id: alma}
+      approval: per-request
+      approvers:
+        - {kind: actor, id: paco}
+        - {kind: human, id: salvador}
