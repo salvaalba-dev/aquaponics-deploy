@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "id": "alma-browser",
+  "account": "pb-alma",
+  "uid": 1059,
+  "unit": "chrome-alma.service"
+}

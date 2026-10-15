@@ -1,2 +1,0 @@
-# Proposal only: exact service argument, no arbitrary service or port selection.
-pb-alma ALL=(root) NOPASSWD: /usr/local/bin/chrome-alma-ensure chrome-alma

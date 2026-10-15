@@ -1,91 +1,80 @@
-# Fixed browser-start controller proposal
+# AU binding for the generic service-start controller
 
-Status: a review component, **not an installation or network isolation plan**.
-Do not install these files independently of the complete approved pilot.
+Status: review only, **not deployable as a standalone pilot**. No VPS changes.
 
-## Boundary
+## Product and installation boundary
 
-The hardened Alma process cannot elevate through sudo. Instead, a system socket
-can activate an external root process for one fixed operation. The caller keeps
-NoNewPrivileges; the handler also has NoNewPrivileges and an empty capability
-set. Root's access to the system manager, rather than caller privilege escalation,
-allows it to request the fixed unit start.
+Reusable code, tests and unit rendering live in the public fork:
+https://github.com/salvaalba-dev/phantomyard-tools/tree/6c8fc1dbfb863247466f0f38797e0c32529a6f00/persona-service-control
 
-The pathname socket is accessible only to root and group pb-alma (0660), inside a
-root-owned directory that must not be writable by Alma. The handler independently
-checks Linux SO_PEERCRED: only pb-alma's current UID or root is accepted. Unknown
-accounts and a target account resolving to UID zero are rejected. Membership in
-the socket group alone does not bypass the peer UID check. Root remains an
-administrator; this design does not isolate a persona from the host administrator.
+AU references that exact commit. It does not maintain a renamed copy of the
+controller. The previous Alma-specific Python scripts and unit files, together
+with the limited sudo mitigation, are superseded and removed from this branch.
+They were never installed during this work. Git history retains the evidence.
 
-The service accepts exactly the seven bytes `ENSURE\n`, followed by write EOF.
-No arguments, configuration, credentials, commands, unit names, URLs or ports
-are read from the request or caller environment. Requests have a two-second
-absolute deadline and a strict byte bound. PID 1 is invoked through a fixed argv,
-without a shell or inherited environment, with a 25-second timeout. Subprocess
-output is discarded. Each handler has a 35-second runtime limit; the socket limits
-concurrent handlers. Peer credentials and request data are not journalled.
+The candidate AU binding is alma-browser.binding.json:
 
-The response is `STARTED\n` if the fixed `systemctl start chrome-alma.service`
-operation returns zero, otherwise `ERROR\n` (or connection failure). A malformed
-authorized request receives `DENIED\n`; an unauthorized peer receives no response.
-Active units are not restarted by `systemctl start`. Retrying only requests the
-same fixed start operation. A timeout does not prove the system manager cancelled
-its start job. The controller never issues stop, restart, kill or network requests.
+```json
+{
+  "version": 1,
+  "id": "alma-browser",
+  "account": "pb-alma",
+  "uid": 1059,
+  "unit": "chrome-alma.service"
+}
+```
 
-STARTED is **not** browser health, Google login validation, NotebookLM availability,
-query approval or network isolation. The client must check its own browser after
-the start. This controller does not enforce the Paco-or-Salvador per-query rule.
+Alma belongs in this deployment mapping, not in executable filenames. New
+installations can use the same controller with their own root-managed bindings.
+The binding ID derives the socket and unit names; requesters cannot select an
+arbitrary service. Root must review mappings against the approved PhantomOrg
+service policy before enabling them. Automatic policy-to-runtime binding is not
+implemented; this binding is not evidence of such validation or query approval.
 
-## Proposed file mapping
+## Eventual mapping, subject to complete pilot approval
 
-| Repository file | Eventual host path, subject to approval |
+| Source | Eventual path |
 |---|---|
-| alma_browser_start_broker.py | /usr/local/libexec/alma_browser_start_broker.py |
-| alma_browser_start_client.py | /usr/local/libexec/alma_browser_start_client.py |
-| phantomorg-alma-browser-start.socket | /etc/systemd/system/phantomorg-alma-browser-start.socket |
-| phantomorg-alma-browser-start@.service | /etc/systemd/system/phantomorg-alma-browser-start@.service |
+| Product persona_service_control.py at pinned commit | /usr/local/libexec/persona_service_control.py |
+| AU alma-browser.binding.json | /etc/persona-service-control/alma-browser.json |
+| Renderer output | /etc/systemd/system/persona-service-start-alma-browser.socket and persona-service-start-alma-browser@.service |
 
-All installed code and units must be root-owned and not writable by any persona.
-The scripts are invoked with `/usr/bin/python3 -I`; they need only Python's standard
-library. The proposed socket path is `/run/phantomorg/alma-browser-start.sock`.
-Before application, check ownership, permissions and symlinks for the entire
-existing parent path, unit drift and dependencies. No profiles or credentials are
-read, copied or changed by the proposed controller.
+The nonsecret binding should be root-owned 0644 with root-owned, nonwritable
+parents so the contained client can read it. The product rejects symlinks,
+untrusted ownership, writable parents and UID drift. Root owns code and units.
+The account's actual primary GID must be resolved on the approved target; the
+renderer uses that numeric GID, without assuming that group and account names or
+UID and GID match. AU CI uses a synthetic GID and is not host attestation.
 
-The existing tools/notebooklm-web.js wakeAndCheck path must replace its sudo call
-with a fixed invocation of `/usr/bin/python3 -I` and the client path above, after
-requiring its existing mapping to be exactly chrome-alma and port 18802. Keep the
-subsequent browser check in the caller's namespace. Other personas must not be
-silently mapped to Alma. No live client patch is included here: the complete
-client and observer changes must be reviewed together with namespace placement.
+The new control socket is /run/persona-service-control/alma-browser.sock. This is
+distinct from Chrome's CDP endpoint. The product client requests only a fixed
+start and needs no sudo. Its handler checks kernel peer UID and preserves
+NoNewPrivileges. STARTED means only systemctl returned zero, not browser health,
+Google login, NotebookLM availability, query approval or isolation.
 
-Retire the old sudoers grant only as part of the approved transition after the
-new path works under the real hardened execution context. Do not activate this
-controller alongside an unreconciled idle observer: the observer still needs to
-inspect Alma's namespace and coordinate with active queries. Browser clients,
-scheduled tasks and the observer must agree on that lifecycle.
+## Integration still pending
 
-## Verification and remaining work
+The actual tools/notebooklm-web.js wakeAndCheck path must replace its sudo call
+with this fixed argv, retaining its own post-start browser check:
 
-Tests exercise rejected peers and requests, fragmented frames, absolute deadlines,
-fixed subprocess arguments, failures, and a real AF_UNIX exchange from a child
-with NoNewPrivs=1. The service operation in tests is always fake: no browser,
-system service or authenticated session is accessed. The peer test uses kernel
-credentials on Linux; fake credentials also cover unauthorized identities.
+```text
+/usr/bin/python3 -I /usr/local/libexec/persona_service_control.py client --config /etc/persona-service-control/alma-browser.json
+```
 
-CI verifies the proposed unit files with systemd-analyze verify without loading,
-enabling or starting them. This is syntax/dependency verification in the CI image,
-not host attestation or a complete namespace pilot validation.
+This is an interface specification, not an applied or complete client patch.
+Require the existing mapping to be exactly chrome-alma and CDP 18802 before
+selecting this AU binding. Do not redirect another persona to Alma. Keep real
+clients and Chrome together in Alma's eventual network namespace. The old direct
+client, real shell wrapper, timers and idle observer all need reconciled coverage.
+The idle observer must inspect that namespace and coordinate with active queries.
+Do not weaken NoNewPrivileges or copy, replace or reauthenticate the browser profile.
 
-Still required before application: all client paths and idle-observer integration,
-namespace/NAT/DNS and shared-service dependency diff, complete rollback, host unit
-verification, then Salvador's explicit approval. Live acceptance must retain the
-profiles in place and test actual tools, bidirectional isolation for two identity
-pairs, persistence and rollback. None of these live acceptance checks has run.
+Retire the existing unrestricted helper and sudoers grant only in the complete
+approved transition after actual hardened-path validation. No existing host file
+has been removed. Per-query approval remains Paco OR Salvador through AU
+Coordination; browser start permission does not implement or replace it.
 
-Primary references:
-
-- https://github.com/systemd/systemd/blob/v255/man/systemd.socket.xml
-- https://github.com/systemd/systemd/blob/v255/man/systemd.exec.xml
-- https://www.kernel.org/doc/html/latest/userspace-api/no_new_privs.html
+Still required: full dependency coverage, namespace/DNS/NAT and firewall diff,
+complete rollback, host unit verification, explicit application approval, real
+own-tool operation, bidirectional cross-identity denial for two pairs and
+persistence checks. None is established by the controller's CI tests.

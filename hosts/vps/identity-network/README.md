@@ -62,26 +62,28 @@ which fail full PhantomOrg shape validation; this check is not a claim that the
 entire sanitized org can be built or that a live query has been authorized.
 Production validation is not weakened to accept those placeholders.
 
-## Limited helper proposal
+## Generic controller and AU binding
 
-proposals/chrome-alma-ensure.sh narrows requests to exactly chrome-alma, fixes the
-probe endpoint, validates the sudo caller and explicitly probes the browser's
-declared network namespace. The matching sudoers proposal constrains arguments.
-The production helper has no environment-selectable executable paths. Tests use
-temporary copies and fake binaries; no real service or network operation runs.
+Reusable implementation and tests now live in the product repository under
+persona-service-control, pinned here to commit
+6c8fc1dbfb863247466f0f38797e0c32529a6f00. AU contains only its candidate binding,
+authority fragment, integration notes and binding tests. The superseded private
+Python implementations, fixed units and sudo-helper mitigation are removed from
+this branch; they remain available in Git history. This removes proposals from
+the repository only, not the existing helper or sudo rule on the VPS.
 
-This is a limited mitigation proposal, **not the working on-demand solution** for
-the hardened persona and not a namespace deployment. Do not install these files
-as the pilot. The sudo/NoNewPrivs conflict remains even with constrained arguments.
-The helper's health result is neither Google-login validation nor an approval grant.
+proposals/alma-browser.binding.json maps UID 1059, account pb-alma and the single
+chrome-alma.service start operation. The product derives the control socket from
+the binding ID. It contains no browser profile path, credential or port.
+proposals/BROWSER-START-CONTROLLER.md explains the boundary and remaining work.
 
 ## Required next design
 
-The fixed-operation controller is now a review component under
-proposals/BROWSER-START-CONTROLLER.md, with proposed socket/service units and
-Linux socket tests. It is not deployed. It supersedes the limited sudo helper as
-the intended on-demand design, but requires the client, observer and namespace
-integration below before it can become an installable pilot.
+The generic controller is a review component, not deployed. Its renderer produces
+review-only units and does not install them. The product CI verifies generated
+units and the shared implementation; AU CI checks the candidate assignment and
+authority against that pinned code. No test attests the VPS primary group or live
+runtime. Client, observer and namespace integration are still needed.
 
 1. Preserve NoNewPrivileges. Use a narrowly scoped external control service,
    reachable through an AF_UNIX socket with filesystem permissions and peer-UID
