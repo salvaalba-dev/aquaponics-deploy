@@ -65,6 +65,13 @@ against another process concurrently replacing files or moving Drive objects.
 
 ## Rollout
 
+The scheduler defaults to `CLEANUP_MODE=report`, including when the variable is
+unset or empty. It invokes the checker without `--borrar`, so neither deletion
+nor journal recovery is performed. An unrecognized mode holds the checker
+without invoking it. After reviewing the reports and reconciling historical
+deliveries, an operator can explicitly set `CLEANUP_MODE=delete` to request
+verified cleanup. This does not bypass any delivery or final archive checks.
+
 Review live/source differences before installing; repository snapshots can lag
 the host. Install the checker and scheduler together, configure only approved
 routes, and run reporting mode before enabling deletion. Keep old recordings
