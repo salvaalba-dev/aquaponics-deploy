@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""VPS-side post-meeting pipeline: transcribe -> summarize -> upload to Drive -> cleanup.
+"""VPS-side post-meeting pipeline: transcribe -> summarize -> upload to Drive -> verified retention.
 
 Moves the heavy lifting off the MacBookPro: the server already owns the MP4
 (recorded by Jibri) and already runs Whisper + DeepSeek summary. This script
@@ -11,7 +11,7 @@ adds the final steps of the custody flow (see Meetings.md «Custodia»):
   4. upload MP4 + .txt + .resumen.md to Drive folder 0211_Reuniones_AU
      (resumable chunked upload, no full-file buffering)
   5. verify the upload (name + size on Drive)
-  6. delete the server copies (unless --keep) after verification
+  6. retain server copies until the separate final-archive check succeeds
 
 Designed to run as a detached background job (nohup / systemd-run), so it
 never blocks a bot turn. Logs to /var/recordings/process-<name>.log.
@@ -458,15 +458,9 @@ def main():
         log("ERROR: verification failed, keeping server copies")
         sys.exit(4)
 
-    # 5. Cleanup (unless --keep)
-    if args.keep:
-        log("--keep: server copies retained")
-    else:
-        for path in (mp4, txt, resumen) + tuple(pdf_docs) + (coherencia,):
-            if os.path.exists(path):
-                os.remove(path)
-                log("deleted server copy: %s" % path)
-        log("cleanup done")
+    # Uploading to an intake folder is not proof of final archival. Retain all
+    # local files, even without --keep; only the verified cleanup owns deletion.
+    log("server copies retained pending final per-artifact archival verification")
 
     log("=== DONE %s ===" % room)
 

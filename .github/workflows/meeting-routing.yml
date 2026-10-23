@@ -1,10 +1,10 @@
 name: Meeting routing regression
 on:
   push:
-    branches: [codex/explicit-meeting-routing, main]
-    paths: ['pipeline/post-meeting/**', '.github/workflows/meeting-routing.yml']
+    branches: [main]
+    paths: ['pipeline/post-meeting/**', 'pipeline/whisper-transcribe/process_recording.py', '.github/workflows/meeting-routing.yml']
   pull_request:
-    paths: ['pipeline/post-meeting/**', '.github/workflows/meeting-routing.yml']
+    paths: ['pipeline/post-meeting/**', 'pipeline/whisper-transcribe/process_recording.py', '.github/workflows/meeting-routing.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,6 +16,6 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
-      - run: python -m unittest discover -s pipeline/post-meeting -p test_route.py -v
+      - run: python -m unittest discover -s pipeline/post-meeting -p 'test_*.py' -v
       - run: bash -n pipeline/post-meeting/post-meeting.sh
-      - run: python -m compileall -q pipeline/post-meeting/resolve-route.py pipeline/post-meeting/test_route.py
+      - run: python -m compileall -q pipeline/post-meeting/resolve-route.py pipeline/post-meeting/test_route.py pipeline/post-meeting/cotejo.py pipeline/post-meeting/test_cleanup.py pipeline/whisper-transcribe/process_recording.py
