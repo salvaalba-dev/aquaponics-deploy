@@ -6,7 +6,7 @@
 #   -> aviso por correo -> registro. Idempotente; nunca borra antes de entregar.
 # Politica (decision 24/08/2026, Salvador): bandeja unica -> PhantomDocs (integridad
 # + sensibilidad) -> destino segun la regla 09/10/2026 (reunion del GO -> 01_REUNIONES_GO;
-# otra reunion de AU -> 0211_Reuniones_AU). El archivo final lo pone PhantomDocs.
+# Final archival is a separate deployment-owned step; reference ingestion does not move files.
 set -uo pipefail
 CONF=/opt/post-meeting/config
 # shellcheck disable=SC1090
@@ -20,6 +20,7 @@ WORK_PY=${WORK_PY:-/opt/whisper-transcribe/venv/bin/python}
 PROC=${PROC:-/opt/whisper-transcribe/process_recording.py}
 MINT=${MINT:-/opt/recordings-serve/mint-url.py}
 LOCK=${LOCK:-/run/post-meeting.lock}
+ROUTE=${ROUTE:-/opt/post-meeting/resolve-route.py}
 
 log(){ printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >>"$LOG_FILE"; }
 
@@ -34,14 +35,14 @@ dept_email(){ # $1 = clave de departamento o dirección completa
   case "$d" in *@*) printf '%s' "$d"; return 0;; esac
   e=$(printf '%s\n' "${DEPT_MAP:-}" | awk -F: -v k="$d" 'tolower($1)==tolower(k){print $2}' | head -1)
   [ -n "$e" ] && { printf '%s' "$e"; return 0; }
-  printf '%s\n' "${DEPT_MAP:-}" | awk -F: -v k="${DEFAULT_DEPT:-secretaria}" 'tolower($1)==tolower(k){print $2}' | head -1
+  return 1 # Missing destinations must not fall back to another department.
 }
 
 dept_inbox(){ # $1 = clave de departamento -> "id_carpeta|nombre" de la bandeja en Drive
   local d="$1" e
   e=$(printf '%s\n' "${DEPT_INBOX_MAP:-}" | awk -F: -v k="$d" 'tolower($1)==tolower(k){print $2; exit}')
   [ -n "$e" ] && { printf '%s' "$e"; return 0; }
-  printf '%s\n' "${DEPT_INBOX_MAP:-}" | awk -F: -v k="${DEFAULT_DEPT:-secretaria}" 'tolower($1)==tolower(k){print $2; exit}'
+  return 1 # The selected department must have its own declared inbox.
 }
 
 audio_report(){ # $1 = fichero ; imprime el informe de audio
@@ -71,24 +72,19 @@ for f in "$REC_DIR"/*.mp4; do
   s1=$(stat -c %s "$f"); sleep "${STABLE_SECONDS:-20}"; s2=$(stat -c %s "$f")
   [ "$s1" != "$s2" ] && { log "aún escribiéndose: $base"; continue; }
 
-  dept="${DEFAULT_DEPT:-secretaria}"
-  [ -f "$f.dept" ] && dept=$(head -1 "$f.dept" | tr -d '[:space:]')
-  if [ -f "$f.meta.json" ]; then
-    d2=$(grep -oE '"department"[[:space:]]*:[[:space:]]*"[^"]+"' "$f.meta.json" | sed -E 's/.*"([^"]+)"$/\1/')
-    [ -n "${d2:-}" ] && dept="$d2"
-  fi
-  # Orden de reunion en Drive (Mac->VPS por Drive): destino = departamento solicitante.
-  # No pisa un override local explicito (.dept).
-  if [ ! -f "$f.dept" ]; then
-    d3=$(/opt/whisper-transcribe/venv/bin/python /opt/post-meeting/get-dept.py "$stem" 2>/dev/null | head -1 | tr -d '[:space:]')
-    if [ -n "${d3:-}" ]; then dept="$d3"; log "orden de reunion en Drive: dept=$dept"; fi
+  # Resolve only explicit context; a missing/failed order must not route to
+  # Secretariat. Processing custody and document access remain unchanged.
+  if ! dept=$("$WORK_PY" "$ROUTE" "$f" --lookup-python "$WORK_PY" \
+      --lookup-script /opt/post-meeting/get-dept.py 2>>"$LOG_FILE"); then
+    log "HOLD stage=routing meeting=$stem reason=explicit-context-required"
+    continue
   fi
   to=$(dept_email "$dept")
   entry=$(dept_inbox "$dept"); inbox="${entry%%|*}"; inbox_name="${entry#*|}"
   [ "$inbox_name" = "$entry" ] && inbox_name="$dept"
 
   log "=== $stem | dept=$dept | bandeja=$inbox_name ($inbox) | aviso=$to ==="
-  if [ -z "$inbox" ]; then
+  if [ -z "$inbox" ] || [ -z "$to" ]; then
     log "ERROR: el departamento '$dept' no tiene bandeja declarada; no proceso $stem"
     continue
   fi
@@ -172,6 +168,8 @@ JSON
   fi
 
 
+  # Legacy done means processing/delivery attempted, not registered/archived.
+  log "STATE stage=processing-finished delivery=see-receipt registration=not-confirmed archive=not-confirmed meeting=$stem"
   : > "$STATE_DIR/$stem.done"
   printf '%s %s %s %s segments=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$stem" "$dept" "$to" "$segs" >> "$STATE_DIR/records.log"
 
