@@ -192,7 +192,19 @@ done
 
 # Run under the existing round lock; each artifact needs its own archive proof.
 # A missing route map or legacy delivery metadata keeps local files intact.
-if ! CLEANUP_ARCHIVE_MAP="${CLEANUP_ARCHIVE_MAP:-}" "$WORK_PY" "$COTEJO" --borrar >>"$LOG_FILE" 2>&1; then
-  log "HOLD stage=cleanup reason=verification-incomplete"
-fi
+case "${CLEANUP_MODE:-report}" in
+  report|delete)
+    cleanup_args=()
+    if [ "${CLEANUP_MODE:-report}" = "delete" ]; then
+      cleanup_args+=(--borrar)
+    fi
+    log "STATE stage=cleanup mode=${CLEANUP_MODE:-report}"
+    if ! CLEANUP_ARCHIVE_MAP="${CLEANUP_ARCHIVE_MAP:-}" "$WORK_PY" "$COTEJO" "${cleanup_args[@]}" >>"$LOG_FILE" 2>&1; then
+      log "HOLD stage=cleanup reason=verification-incomplete"
+    fi
+    ;;
+  *)
+    log "HOLD stage=cleanup reason=invalid-cleanup-mode"
+    ;;
+esac
 log "fin de ronda"

@@ -3,6 +3,9 @@
 import hashlib
 import importlib.util
 import json
+import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 from email.message import EmailMessage
@@ -404,6 +407,59 @@ class CleanupTests(unittest.TestCase):
         )
         cleanup.recover_cleanup(self.root)
         self.assertFalse(stage.exists())
+
+
+class SchedulerModeTests(unittest.TestCase):
+    def run_scheduler(self, mode=None, result=0):
+        shell = shutil.which("bash")
+        self.assertIsNotNone(shell, "Bash is required to test the scheduler")
+        source = Path(__file__).with_name("post-meeting.sh").read_text(encoding="utf-8")
+        footer = source[source.index("# Run under the existing round lock;") :]
+        environment = os.environ.copy()
+        environment.pop("CLEANUP_MODE", None)
+        if mode is not None:
+            environment["CLEANUP_MODE"] = mode
+        harness = (
+            "set -euo pipefail\n"
+            "log() { printf '%s\\n' \"$*\"; }\n"
+            "checker() { printf 'CALLED'; printf ' <%s>' \"$@\"; "
+            f"printf '\\n'; return {result}; }}\n"
+            "WORK_PY=checker\nCOTEJO=synthetic-checker\n"
+            "LOG_FILE=$(mktemp)\ntrap 'rm -f \"$LOG_FILE\"' EXIT\n"
+        )
+        completed = subprocess.run(
+            [shell, "--noprofile", "--norc"],
+            input=harness + footer + '\ncat "$LOG_FILE"\n',
+            text=True,
+            capture_output=True,
+            env=environment,
+            check=True,
+        )
+        return completed.stdout
+
+    def test_default_and_explicit_report_never_request_deletion(self):
+        for mode in (None, "", "report"):
+            with self.subTest(mode=mode):
+                output = self.run_scheduler(mode)
+                self.assertIn("CALLED <synthetic-checker>", output)
+                self.assertNotIn("--borrar", output)
+                self.assertIn("mode=report", output)
+
+    def test_explicit_delete_requests_verified_cleanup(self):
+        output = self.run_scheduler("delete")
+        self.assertIn("CALLED <synthetic-checker> <--borrar>", output)
+
+    def test_invalid_mode_never_invokes_checker(self):
+        for mode in ("DELETE", "typo", "report --borrar"):
+            with self.subTest(mode=mode):
+                output = self.run_scheduler(mode)
+                self.assertNotIn("CALLED", output)
+                self.assertIn("reason=invalid-cleanup-mode", output)
+
+    def test_failed_report_is_held_without_aborting_round(self):
+        output = self.run_scheduler("report", result=1)
+        self.assertIn("reason=verification-incomplete", output)
+        self.assertIn("fin de ronda", output)
 
 
 if __name__ == "__main__":
