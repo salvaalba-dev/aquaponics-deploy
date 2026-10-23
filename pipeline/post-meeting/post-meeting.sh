@@ -125,6 +125,9 @@ for f in "$REC_DIR"/*.mp4; do
 {"room":"$stem","department":"$dept","bandeja":"$inbox_name","bandeja_id":"$inbox","aviso":"$to","processed":"$(date -u +%Y-%m-%dT%H:%M:%SZ)","segments":$segs,"audio":"$audio_line","recording_url":"$url"}
 JSON
 
+  # Prepare evidence before rendering; submit the exact frozen MIME bytes.
+  message=$(mktemp "$dest/.mail-XXXXXX") || continue
+  if "$WORK_PY" "$COTEJO" --prepare-delivery "$dest/meta.json" --recording "$f" >>"$LOG_FILE" 2>&1; then
   {
     printf 'To: %s\n' "$to"
     printf 'From: %s\n' "${MAIL_FROM:-grabaciones@aquaponicsunited.com}"
@@ -144,17 +147,16 @@ JSON
       base64 -w 76 "$a"; echo
     done
     printf -- '--AU-BOUNDARY--\n'
-  } | /usr/sbin/sendmail -t -oi 2>>"$LOG_FILE"
-  delivery_status=$?
-  if [ "$delivery_status" = "0" ] && [ "${TEST_NO_UPLOAD:-0}" != "1" ]; then
-    if "$WORK_PY" "$COTEJO" --confirm-delivery "$dest/meta.json" --recording "$f" >>"$LOG_FILE" 2>&1; then
+  } >"$message"
+    if [ "${TEST_NO_UPLOAD:-0}" != "1" ] && "$WORK_PY" "$COTEJO" --send-delivery "$dest/meta.json" --recording "$f" --message "$message" >>"$LOG_FILE" 2>&1; then
       log "STATE delivery=sendmail-accepted meeting=$stem archive=not-confirmed"
     else
-      log "HOLD stage=cleanup meeting=$stem reason=delivery-evidence-unavailable"
+      log "HOLD stage=cleanup meeting=$stem reason=delivery-not-confirmed"
     fi
   else
-    log "HOLD stage=cleanup meeting=$stem reason=delivery-not-confirmed"
+    log "HOLD stage=cleanup meeting=$stem reason=delivery-evidence-unavailable"
   fi
+  rm -f "$message"
 
   # M7: informe de coherencia APARTE, a Secretaría (no al departamento).
   _coh="$REC_DIR/$room.coherencia.md"

@@ -8,23 +8,38 @@ archive verification. The scheduled checker is the sole local deletion path.
 
 - Exactly one dated delivery directory matching the complete recording stem.
 - Its existing `meta.json` binds the exact recording and explicit department.
-- A delivery record is added to that metadata only after sendmail accepts a
-  non-test delivery. This proves acceptance by the local mail system, not that
-  the recipient read the message. Merely naming a recipient or inbox proves
-  nothing. No new notification, upload, or duplicate ingestion is performed.
+- Before generating MIME, record the artifact fingerprints in the existing
+  metadata and invalidate any older delivery acceptance. Validate the rendered
+  attachments against that preparation, then submit the exact in-memory MIME
+  bytes to sendmail. Record their SHA-256 only after acceptance and another
+  artifact check. Changes before or during submission leave cleanup held.
+  This proves local MTA acceptance, not that the recipient read the message.
+  The coherence report has its separate notification and is not an attachment
+  of the main message; its own final archive proof is still required.
 - Every candidate's name, byte size, and Drive-compatible MD5 still match the
   recorded delivery. Derivative copies in the delivery directory also match.
 - Every candidate, including each PDF and the coherence report if present, is
   found with the same size and checksum in the explicitly configured final
   destination. The video alone never authorizes deleting its derivatives.
+- Each candidate consumes a distinct Drive object ID. Identical contents need
+  separate objects; repeated entries for one ID do not increase its count.
 - Every page of the destination listing must succeed. Incomplete searches,
   inaccessible destinations, ambiguous metadata, and changed files retain
   the entire group. A second local-content check precedes deletion.
 
-The command defaults to reporting only. `--borrar` removes only the verified
-artifact list; delivery copies, control metadata, other recordings, and Drive
-objects remain intact. It does not certify native PhantomDocs registration or
-alter any document category, owner, ACL, archive record, or history.
+The command defaults to reporting only. `--borrar` first renames the verified
+artifacts into a private temporary directory on the same filesystem, with a
+durable journal. Failures before commitment restore moved files without
+overwriting newly created sources. Only after verifying the whole staged group
+is the transaction marked committed and its contents purged. Startup recovery
+restores interrupted preparations or resumes committed purges before new scans.
+An interrupted purge may leave staged leftovers; multi-file deletion is not
+atomic. Such leftovers remain journaled for retry instead of leaving an
+unrecorded partially deleted group. No permanent document backup is introduced.
+
+Delivery copies, control metadata, other recordings, and Drive objects remain
+intact. This does not certify native PhantomDocs registration or alter any
+document category, owner, ACL, archive record, or history.
 
 ## Explicit final destinations
 
