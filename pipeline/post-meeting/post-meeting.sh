@@ -21,6 +21,7 @@ PROC=${PROC:-/opt/whisper-transcribe/process_recording.py}
 MINT=${MINT:-/opt/recordings-serve/mint-url.py}
 LOCK=${LOCK:-/run/post-meeting.lock}
 ROUTE=${ROUTE:-/opt/post-meeting/resolve-route.py}
+COTEJO=${COTEJO:-/opt/post-meeting/cotejo.py}
 
 log(){ printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >>"$LOG_FILE"; }
 
@@ -143,9 +144,17 @@ JSON
       base64 -w 76 "$a"; echo
     done
     printf -- '--AU-BOUNDARY--\n'
-  } | /usr/sbin/sendmail -t -oi 2>>"$LOG_FILE" \
-    && log "entregado a $to (segmentos=$segs)" \
-    || log "ERROR: no se pudo entregar a $to"
+  } | /usr/sbin/sendmail -t -oi 2>>"$LOG_FILE"
+  delivery_status=$?
+  if [ "$delivery_status" = "0" ] && [ "${TEST_NO_UPLOAD:-0}" != "1" ]; then
+    if "$WORK_PY" "$COTEJO" --confirm-delivery "$dest/meta.json" --recording "$f" >>"$LOG_FILE" 2>&1; then
+      log "STATE delivery=sendmail-accepted meeting=$stem archive=not-confirmed"
+    else
+      log "HOLD stage=cleanup meeting=$stem reason=delivery-evidence-unavailable"
+    fi
+  else
+    log "HOLD stage=cleanup meeting=$stem reason=delivery-not-confirmed"
+  fi
 
   # M7: informe de coherencia APARTE, a Secretaría (no al departamento).
   _coh="$REC_DIR/$room.coherencia.md"
@@ -173,12 +182,15 @@ JSON
   : > "$STATE_DIR/$stem.done"
   printf '%s %s %s %s segments=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$stem" "$dept" "$to" "$segs" >> "$STATE_DIR/records.log"
 
+  # Delivery alone never authorizes deletion, including legacy configurations.
   if [ "${CLEANUP_AFTER_DELIVERY:-0}" = "1" ]; then
-    rm -f "$f" "$txt" "$res" "$f.dept" && log "copias locales limpiadas de $stem"
+    log "CLEANUP_AFTER_DELIVERY ignored: final per-file archival verification required"
   fi
 done
 
-# Limpieza atada al cotejo: borra copias locales solo si estan procesadas,
-# entregadas y archivadas (mismo hash). Mantiene entregas/ y Drive.
-/opt/whisper-transcribe/venv/bin/python /opt/post-meeting/cotejo.py --borrar >>"$LOG_FILE" 2>&1 || true
+# Run under the existing round lock; each artifact needs its own archive proof.
+# A missing route map or legacy delivery metadata keeps local files intact.
+if ! CLEANUP_ARCHIVE_MAP="${CLEANUP_ARCHIVE_MAP:-}" "$WORK_PY" "$COTEJO" --borrar >>"$LOG_FILE" 2>&1; then
+  log "HOLD stage=cleanup reason=verification-incomplete"
+fi
 log "fin de ronda"
