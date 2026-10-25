@@ -1,0 +1,37 @@
+name: Tick user session configuration
+on:
+  pull_request:
+    paths: ['hosts/vps/systemd/phantombot-tick-user-session.conf.in', 'hosts/vps/systemd/PHANTOMBOT-TICK-USER-SESSION.md', '.github/workflows/tick-user-session.yml']
+  push:
+    branches: [main]
+    paths: ['hosts/vps/systemd/phantombot-tick-user-session.conf.in', 'hosts/vps/systemd/PHANTOMBOT-TICK-USER-SESSION.md', '.github/workflows/tick-user-session.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Validate the rendered instance with native systemd
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture_dir=$(mktemp -d "$RUNNER_TEMP/tick-session-XXXXXX")
+          fixture_uid=$(id -u)
+          test "$fixture_uid" -gt 0
+          unit=phantombot-tick@example.service
+          mkdir -p "$fixture_dir/$unit.d"
+          printf '%s\n' '[Unit]' 'Description=Synthetic tick fixture' \
+            '[Service]' 'Type=oneshot' "User=$fixture_uid" \
+            'ExecStart=/usr/bin/true' 'NoNewPrivileges=yes' 'PrivateTmp=yes' \
+            > "$fixture_dir/$unit"
+          sed "s/@UID@/$fixture_uid/g" \
+            hosts/vps/systemd/phantombot-tick-user-session.conf.in \
+            > "$fixture_dir/$unit.d/50-user-session.conf"
+          ! grep -q '@UID@' "$fixture_dir/$unit.d/50-user-session.conf"
+          grep -Fx "Requires=user@$fixture_uid.service" "$fixture_dir/$unit.d/50-user-session.conf"
+          grep -Fx "After=user@$fixture_uid.service" "$fixture_dir/$unit.d/50-user-session.conf"
+          grep -Fx "Environment=XDG_RUNTIME_DIR=/run/user/$fixture_uid" "$fixture_dir/$unit.d/50-user-session.conf"
+          grep -Fx "Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$fixture_uid/bus" "$fixture_dir/$unit.d/50-user-session.conf"
+          systemd-analyze verify --man=no "$fixture_dir/$unit"
