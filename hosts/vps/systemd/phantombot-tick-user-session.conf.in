@@ -1,0 +1,7 @@
+[Unit]
+Requires=user@@UID@.service
+After=user@@UID@.service
+
+[Service]
+Environment=XDG_RUNTIME_DIR=/run/user/@UID@
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/@UID@/bus
